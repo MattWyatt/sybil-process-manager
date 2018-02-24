@@ -1,7 +1,9 @@
-#include <core/test_class.h>
+#include <core/sybling.h>
 
 int main() {
-    sybil::test_class tc;
-    tc.test_function();
+    std::string process = "/bin/ls";
+    sybil::sybling sy(process);
+    sy.add_args("-a");
+    sy.execute();
     return 0;
 }
