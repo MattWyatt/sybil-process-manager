@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <iostream>
-#include <stdexcept>
 #include "sybling.h"
 
 using namespace sybil;
@@ -31,21 +30,52 @@ void sybling::add_args(std::string arg) {
     _has_args = true;
 }
 
+std::vector<std::string> sybling::get_args() {
+    return _args;
+}
+
+bool sybling::is_running() {
+    return _is_running;
+}
+
+bool sybling::is_child() {
+    if (_pid == 0) {
+        return true;
+    }
+    return false;
+}
+
+pid_t sybling::get_pid() {
+    return _pid;
+}
+
+std::string sybling::get_running_command() {
+    return _running_command;
+}
+
 void sybling::execute() {
-    auto pid = fork();
-    _pid = pid;
+    _pid = fork();
     //if everything went wrong, throw an exception
-    if (pid == -1) {
+    if (_pid == -1) {
         start_error();
     }
 
-    //if we're in the parent process, announce success
-    if (pid > 0) {
-        start_success();
+    //if we're in the parent process, announce success and set full command
+    if (_pid > 0) {
+        _is_running = true;
+        std::string buffer;
+        buffer += _path;
+        for (auto arg : _args) {
+            buffer += arg;
+            buffer += " ";
+        }
+        _running_command = buffer;
+        fork_success();
     }
 
     //if we're in the child process, execute the child
-    if (pid == 0) {
+    if (_pid == 0) {
+        _pid = getpid();
         child_routine();
     }
 }
@@ -55,27 +85,31 @@ inline void sybling::start_error() {
     throw sybling::process_start_error();
 }
 
-inline void sybling::start_success() {
-    std::cout << "successfully spawned child process with id [" << _pid << "]\n";
+inline void sybling::fork_success() {
+    std::cout << "successfully forked child process\n";
 }
 
 inline void sybling::child_routine() {
     //create C-style types of path and args
     auto p_name = _path.c_str(); //should become char*
-    std::vector<char*> v_args; //C-style-character vector for the arguments
-    v_args.reserve(_args.size()+1);
-    for (auto &iterator : _args) {
-        v_args.push_back(const_cast<char*>(iterator.c_str()));
-    }
-    auto p_args = v_args.data(); //store the raw array in p_args
 
-    std::cout << "[child process] turning over control to given process image...\n";
-    std::cout << "process name: " << p_name << std::endl;
-    std::string print_args;
-    for (int i = 0; i < sizeof(p_args); i++) {
-        print_args += p_args[i];
-        print_args += " ";
+    std::cout << "[child process] attempting to turn over control to given process image...\n";
+    if (_has_args) { //run execvp if there are arguments to be run with the program
+        std::vector<char*> v_args; //C-style-character vector for the arguments
+        v_args.reserve(_args.size()+1);
+        for (auto &iterator : _args) {
+            v_args.push_back(const_cast<char*>(iterator.c_str()));
+        }
+        auto p_args = v_args.data(); //store the raw array in p_args
+        if (execvp(p_name, p_args) < 0) {
+            std::cerr << "execution error\n";
+            throw sybling::execution_error();
+        };
     }
-    std::cout << "process arguments: " << print_args << std::endl;
-    execvp(p_name, p_args);
+    else { //if no arguments, just run execl
+        if (execl(p_name, nullptr) < 0) {
+            std::cerr << "execution error\n";
+            throw sybling::execution_error();
+        }
+    }
 }
