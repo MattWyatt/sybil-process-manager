@@ -19,12 +19,17 @@ namespace sybil {
         struct execution_error : std::exception {
             const char* what() const noexcept {return "failed to replace running process";}
         };
+        struct termination_error : std::exception {
+            const char* what() const noexcept {return "failed to terminate process correctly";}
+        };
 
         bool _has_args;
         bool _is_running;
 
         inline void start_error();
         inline void fork_success();
+        inline void terminate_success();
+        inline void terminate_failure();
         inline void child_routine();
 
     public:
@@ -44,6 +49,7 @@ namespace sybil {
         std::string get_running_command();
 
         void execute();
+        void terminate();
     };
 }
 

@@ -1,5 +1,7 @@
 #include <unistd.h>
+#include <csignal>
 #include <iostream>
+#include <wait.h>
 #include "sybling.h"
 
 using namespace sybil;
@@ -80,6 +82,24 @@ void sybling::execute() {
     }
 }
 
+void sybling::terminate() {
+    kill(_pid, SIGKILL);
+
+    int process_status;
+    const auto waited = waitpid(_pid, &process_status, 0);
+    if (waited == _pid) {
+        if (WIFEXITED(process_status) == 0) {
+            terminate_success();
+        }
+        else {
+            terminate_failure();
+        }
+    }
+    else {
+        terminate_failure();
+    }
+}
+
 inline void sybling::start_error() {
     std::cerr << "something went wrong starting the process. throwing exception...\n";
     throw sybling::process_start_error();
@@ -87,6 +107,15 @@ inline void sybling::start_error() {
 
 inline void sybling::fork_success() {
     std::cout << "successfully forked child process\n";
+}
+
+inline void sybling::terminate_success() {
+    std::cout << "successfully stopped child process\n";
+}
+
+inline void sybling::terminate_failure() {
+    std:: cerr << "something went wrong when stopping the process. throwing exception...\n";
+    throw sybling::termination_error();
 }
 
 inline void sybling::child_routine() {
