@@ -12,17 +12,6 @@ namespace sybil {
         std::string _running_command;
         pid_t _pid;
 
-        //TODO: move these exceptions into an "exceptions.h/exceptions.cpp" file
-        struct process_start_error : std::exception {
-            const char* what() const noexcept {return "failed to spawn child";}
-        };
-        struct execution_error : std::exception {
-            const char* what() const noexcept {return "failed to replace running process";}
-        };
-        struct termination_error : std::exception {
-            const char* what() const noexcept {return "failed to terminate process correctly";}
-        };
-
         bool _has_args;
         bool _is_running;
 

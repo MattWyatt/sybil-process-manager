@@ -2,6 +2,7 @@
 #include <csignal>
 #include <iostream>
 #include <wait.h>
+#include "exceptions.h"
 #include "sybling.h"
 
 using namespace sybil;
@@ -102,7 +103,7 @@ void sybling::terminate() {
 
 inline void sybling::start_error() {
     std::cerr << "something went wrong starting the process. throwing exception...\n";
-    throw sybling::process_start_error();
+    throw sybil::process_start_error();
 }
 
 inline void sybling::fork_success() {
@@ -115,7 +116,7 @@ inline void sybling::terminate_success() {
 
 inline void sybling::terminate_failure() {
     std:: cerr << "something went wrong when stopping the process. throwing exception...\n";
-    throw sybling::termination_error();
+    throw sybil::process_termination_error();
 }
 
 inline void sybling::child_routine() {
@@ -125,20 +126,23 @@ inline void sybling::child_routine() {
     std::cout << "[child process] attempting to turn over control to given process image...\n";
     if (_has_args) { //run execvp if there are arguments to be run with the program
         std::vector<char*> v_args; //C-style-character vector for the arguments
-        v_args.reserve(_args.size()+1);
+        v_args.reserve(_args.size());
         for (auto &iterator : _args) {
             v_args.push_back(const_cast<char*>(iterator.c_str()));
         }
+        v_args.push_back(nullptr);
         auto p_args = v_args.data(); //store the raw array in p_args
-        if (execvp(p_name, p_args) < 0) {
-            std::cerr << "execution error\n";
-            throw sybling::execution_error();
+        auto result = execvp(p_name, p_args);
+        if (result < 0) {
+            std::cout << result << std::endl;
+            std::cerr << "execvp execution error\n";
+            throw sybil::process_execution_error();
         };
     }
     else { //if no arguments, just run execl
         if (execl(p_name, nullptr) < 0) {
-            std::cerr << "execution error\n";
-            throw sybling::execution_error();
+            std::cerr << "execl execution error\n";
+            throw sybil::process_execution_error();
         }
     }
 }

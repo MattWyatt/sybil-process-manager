@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <core/sybling.h>
+#include <core/logger.h>
 
 /*
  * main.cpp is currently just the testing file for this project.
@@ -10,8 +11,10 @@
 
 
 int main() {
+    sybil::logger::get()->write("starting sybil...", sybil::logger::STANDARD);
+
     std::string process = "/bin/yes";
-    sybil::sybling sy(process, {""});
+    sybil::sybling sy(process, {"y"});
     sy.execute();
     std::cout << "called execute() with: " << sy.get_running_command() << std::endl;
     std::cout << "about to call terminate() on process\n";
