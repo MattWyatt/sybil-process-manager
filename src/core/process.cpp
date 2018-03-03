@@ -70,8 +70,8 @@ void process::execute() {
         std::string buffer;
         buffer += _path;
         for (auto arg : _args) {
-            buffer += arg;
             buffer += " ";
+            buffer += arg;
         }
         _running_command = buffer;
         fork_success();

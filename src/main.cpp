@@ -15,14 +15,14 @@ int main() {
     sybil::logger::get()->set_level(sybil::logger::DEBUG);
     sybil::logger::get()->write("starting sybil...", sybil::logger::STANDARD);
 
-    std::string process = "/bin/yes";
-    sybil::process* sy = new sybil::process(process, {"y"});
+    std::string process = "/bin/python";
+    sybil::process* sy = new sybil::process(process);
     sybil::overseer o(sy);
     o.begin();
     std::cout << "called execute() with: " << o.get_running_command() << std::endl;
     std::cout << "about to call terminate() on process\n";
     o.stop();
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     sybil::logger::get()->write("getting last few lines", sybil::logger::STANDARD);
     sybil::logger::get()->print_latest(5);
     return 0;
