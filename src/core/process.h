@@ -5,12 +5,13 @@
 #include <vector>
 
 namespace sybil {
-    class sybling {
+    class process {
     private:
         std::string _path;
         std::vector<std::string> _args;
         std::string _running_command;
         pid_t _pid;
+
 
         bool _has_args;
         bool _is_running;
@@ -23,8 +24,8 @@ namespace sybil {
 
     public:
         //2 possible constructors, path is always required. args can be set later if wished
-        sybling(std::string path, std::vector<std::string> args);
-        sybling(std::string path);
+        process(std::string path, std::vector<std::string> args);
+        process(std::string path);
 
         //argument manipulation functions
         void set_args(std::vector<std::string> args);

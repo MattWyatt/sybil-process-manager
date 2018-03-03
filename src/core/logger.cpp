@@ -1,8 +1,7 @@
 #include <iostream>
-#include <string>
-#include <stdexcept>
 #include <fstream>
 #include <algorithm>
+#include <chrono>
 #include "logger.h"
 
 using namespace sybil;
@@ -21,13 +20,23 @@ void logger::write(std::string message, logger_level level) {
         write("log level out of range", DEBUG);
         throw std::out_of_range("log level out of range");
     }
-    //TODO timestamps
-    if (level >= _log_level) {
-        std::cout << _prefixes.at(level) << message << std::endl;
+    //timestamp creation
+    auto current_time = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(current_time);
+    auto printable_time = ctime(&tt);
+    std::string timestamp = "[";
+    timestamp += printable_time;
+    if (!timestamp.empty() && timestamp[timestamp.length()-1] == '\n') {
+        timestamp.erase(timestamp.length()-1);
     }
-    std::ofstream file("sybil.log");
+    timestamp += "] ";
+    //end timestamp creation
+    if (level >= _log_level) {
+        std::cout << timestamp << _prefixes.at(level) << message << std::endl;
+    }
+    std::ofstream file("sybil.log", std::ios::app);
     if (file.is_open()) {
-        file << _prefixes.at(level) << message << std::endl;
+        file << timestamp << _prefixes.at(level) << message << std::endl;
     }
     file.close();
 }
@@ -54,8 +63,13 @@ std::vector<std::string> logger::latest(int count) {
     }
     file.close();
     std::vector<std::string> latest;
-    for (int i = lines.size(); i > (lines.size() - count); i--) {
-        latest.push_back(lines.at(i));
+    int current_count = 0;
+    for (auto iterator : lines) {
+        if (current_count >= count) {
+            break;
+        }
+        latest.push_back(iterator);
+        current_count++;
     }
     std::reverse(latest.begin(), latest.end());
     return latest;
