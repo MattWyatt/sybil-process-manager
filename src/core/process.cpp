@@ -78,7 +78,7 @@ void process::execute() {
     }
 
     //if we're in the child process, execute the child
-    if (_pid == 0) {
+    if (is_child()) {
         _pid = getpid();
         child_routine();
     }
