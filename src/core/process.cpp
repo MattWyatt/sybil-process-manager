@@ -11,6 +11,7 @@ using namespace sybil;
 process::process(std::string path, std::vector<std::string> args) {
     _path = path;
     _args = args;
+    _pipe = new process_pipe();
 
     _has_args = true;
 }
@@ -18,6 +19,7 @@ process::process(std::string path, std::vector<std::string> args) {
 process::process(std::string path) {
     _path = path;
     _has_args = false;
+    _pipe = new process_pipe();
 }
 
 void process::set_args(std::vector<std::string> args) {
@@ -67,6 +69,7 @@ void process::execute() {
     //if we're in the parent process, announce success and set full command
     if (_pid > 0) {
         _is_running = true;
+        //close in[read] and out
         std::string buffer;
         buffer += _path;
         for (auto arg : _args) {
@@ -80,6 +83,21 @@ void process::execute() {
     //if we're in the child process, execute the child
     if (is_child()) {
         _pid = getpid();
+        //redirect the input and output through pipes to the parent process
+        if (dup2(_pipe->get_stdin()[PIPE_READ], STDIN_FILENO) == -1) {
+            logger::get()->fatal("failed to redirect standard input!");
+        }
+        if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDOUT_FILENO) == -1) {
+            logger::get()->fatal("failed to redirect standard output!");
+        }
+        if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDERR_FILENO) == -1) {
+            logger::get()->fatal("failed to redirect standard error output!");
+        }
+        //close all pipes to the child process, they're only to be accessed by the overseer
+        close(_pipe->get_stdin()[PIPE_READ]);
+        close(_pipe->get_stdin()[PIPE_WRITE]);
+        close(_pipe->get_stdout()[PIPE_READ]);
+        close(_pipe->get_stdout()[PIPE_WRITE]);
         child_routine();
     }
 }

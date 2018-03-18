@@ -1,4 +1,8 @@
 #include "overseer.h"
+#include "logger.h"
+#include <unistd.h>
+#include <iostream>
+#include <cstring>
 
 using namespace sybil;
 
@@ -22,6 +26,20 @@ void overseer::begin() {
 
 void overseer::stop() {
     _process->terminate();
+}
+
+std::string overseer::read_process() {
+    std::string t;
+    char cChar;
+    while(read(_process->_pipe->get_stdout()[PIPE_READ], &cChar, 1) == 1) {
+        std::cout << cChar;
+    }
+    logger::get()->debug(t);
+    return "H";
+}
+
+void overseer::write_process(std::string message) {
+    write(_process->_pipe->get_stdin()[PIPE_WRITE], message.c_str(), strlen(message.c_str()));
 }
 
 bool overseer::is_running() {

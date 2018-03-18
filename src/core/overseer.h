@@ -15,6 +15,8 @@ namespace sybil {
 
         void begin();
         void stop();
+        std::string read_process();
+        void write_process(std::string message);
 
         //duplicated functions from the friend process
         bool is_running();

@@ -31,6 +31,10 @@ namespace sybil {
 
         static logger* get();
         void write(std::string message, logger_level level);
+        void verbose(std::string message);
+        void debug(std::string message);
+        void standard(std::string message);
+        void fatal(std::string message);
         void set_level(logger_level level);
         std::vector<std::string> latest(int count); //return the last X lines in a vector
         std::string print_latest(int count); //print the latest X lines

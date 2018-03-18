@@ -41,6 +41,22 @@ void logger::write(std::string message, logger_level level) {
     file.close();
 }
 
+void logger::verbose(std::string message) {
+    write(message, VERBOSE);
+}
+
+void logger::debug(std::string message) {
+    write(message, DEBUG);
+}
+
+void logger::standard(std::string message) {
+    write(message, STANDARD);
+}
+
+void logger::fatal(std::string message) {
+    write(message, FATAL);
+}
+
 void logger::set_level(logger_level level) {
     if (level > 3 || level < 0) {
         write("log level out of range", DEBUG);

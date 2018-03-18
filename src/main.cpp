@@ -13,17 +13,19 @@
 
 int main() {
     sybil::logger::get()->set_level(sybil::logger::DEBUG);
-    sybil::logger::get()->write("starting sybil...", sybil::logger::STANDARD);
+    sybil::logger::get()->standard("starting sybil...");
 
-    std::string process = "/bin/python";
+    std::string process = "/bin/ls";
     sybil::process* sy = new sybil::process(process);
+    sy->add_args("-a");
     sybil::overseer o(sy);
     o.begin();
+    o.read_process();
     std::cout << "called execute() with: " << o.get_running_command() << std::endl;
     std::cout << "about to call terminate() on process\n";
     o.stop();
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    sybil::logger::get()->write("getting last few lines", sybil::logger::STANDARD);
+    sybil::logger::get()->standard("getting last few lines");
     sybil::logger::get()->print_latest(5);
     return 0;
 }

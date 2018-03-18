@@ -1,14 +1,18 @@
 #ifndef SYBIL_PROCESS_MANAGER_SYBLING_H
 #define SYBIL_PROCESS_MANAGER_SYBLING_H
 
+
+
 #include <string>
 #include <vector>
+#include <core/process_pipe.h>
 
 namespace sybil {
     class process {
         friend class overseer;
     private:
         std::string _path;
+        process_pipe* _pipe;
         std::vector<std::string> _args;
         std::string _running_command;
         pid_t _pid;
