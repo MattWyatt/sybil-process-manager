@@ -16,8 +16,7 @@ int main() {
     sybil::logger::get()->standard("starting sybil...");
 
     std::string process = "/bin/ls";
-    sybil::process* sy = new sybil::process(process);
-    sy->add_args("-a");
+    sybil::process* sy = new sybil::process(process, {"-a"});
     sybil::overseer o(sy);
     o.begin();
     o.read_process();

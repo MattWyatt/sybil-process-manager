@@ -31,10 +31,16 @@ void overseer::stop() {
 std::string overseer::read_process() {
     std::string t;
     char cChar;
-    while(read(_process->_pipe->get_stdout()[PIPE_READ], &cChar, 1) == 1) {
-        std::cout << cChar;
+    int result;
+    while(true) {
+        result = read(_process->_pipe->get_stdout()[PIPE_READ], &cChar, 1);
+        if (result != 1) {
+            break;
+        }
+        logger::get()->verbose(std::to_string(cChar));
+        t += cChar;
     }
-    logger::get()->debug(t);
+    logger::get()->standard(t);
     return "H";
 }
 

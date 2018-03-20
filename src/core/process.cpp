@@ -69,7 +69,9 @@ void process::execute() {
     //if we're in the parent process, announce success and set full command
     if (_pid > 0) {
         _is_running = true;
-        //close in[read] and out
+        //close in[read] and out[write]
+        close(_pipe->get_stdin()[PIPE_READ]);
+        close(_pipe->get_stdout()[PIPE_WRITE]);
         std::string buffer;
         buffer += _path;
         for (auto arg : _args) {
@@ -83,21 +85,6 @@ void process::execute() {
     //if we're in the child process, execute the child
     if (is_child()) {
         _pid = getpid();
-        //redirect the input and output through pipes to the parent process
-        if (dup2(_pipe->get_stdin()[PIPE_READ], STDIN_FILENO) == -1) {
-            logger::get()->fatal("failed to redirect standard input!");
-        }
-        if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDOUT_FILENO) == -1) {
-            logger::get()->fatal("failed to redirect standard output!");
-        }
-        if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDERR_FILENO) == -1) {
-            logger::get()->fatal("failed to redirect standard error output!");
-        }
-        //close all pipes to the child process, they're only to be accessed by the overseer
-        close(_pipe->get_stdin()[PIPE_READ]);
-        close(_pipe->get_stdin()[PIPE_WRITE]);
-        close(_pipe->get_stdout()[PIPE_READ]);
-        close(_pipe->get_stdout()[PIPE_WRITE]);
         child_routine();
     }
 }
@@ -108,11 +95,11 @@ void process::terminate() {
     int process_status;
     const auto waited = waitpid(_pid, &process_status, 0);
     if (waited == _pid) {
-        if (WIFEXITED(process_status) == 0) {
-            terminate_success();
+        if (WIFEXITED(process_status) == -1) {
+            terminate_failure();
         }
         else {
-            terminate_failure();
+            terminate_success();
         }
     }
     else {
@@ -139,6 +126,25 @@ inline void process::terminate_failure() {
 }
 
 inline void process::child_routine() {
+    //redirect the input and output through pipes to the parent process
+    if (dup2(_pipe->get_stdin()[PIPE_READ], STDIN_FILENO) == -1) {
+        logger::get()->fatal("failed to redirect standard input!");
+    }
+    if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDOUT_FILENO) == -1) {
+        logger::get()->fatal("failed to redirect standard output!");
+    }
+    if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDERR_FILENO) == -1) {
+        logger::get()->fatal("failed to redirect standard error output!");
+    }
+    //close all pipes to the child process, they're only to be accessed by the overseer
+    if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
+    close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
+    close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
+    close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
+        logger::get()->fatal("failed to close child pipes!");
+    }
+
+
     //create C-style types of path and args
     auto p_name = _path.c_str(); //should become char*
 
@@ -155,12 +161,28 @@ inline void process::child_routine() {
         if (result < 0) {
             logger::get()->write("execvp execution error", logger::DEBUG);
             throw sybil::process_execution_error();
-        };
+        }
+        else {
+            if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
+                close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
+                close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
+                close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
+                logger::get()->fatal("failed to close child pipes!");
+            }
+        }
     }
     else { //if no arguments, just run execl
         if (execl(p_name, nullptr) < 0) {
-            logger::get()->write("execl execution error", logger::DEBUG);
+            logger::get()->debug("execl execution error");
             throw sybil::process_execution_error();
+        }
+        else {
+            if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
+                close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
+                close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
+                close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
+                logger::get()->fatal("failed to close child pipes!");
+            }
         }
     }
 }
