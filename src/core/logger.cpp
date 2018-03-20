@@ -57,6 +57,38 @@ void logger::fatal(std::string message) {
     write(message, FATAL);
 }
 
+void logger::verbose(std::vector<std::string> message) {
+    std::string buffer;
+    for (auto iterator : message) {
+        buffer += iterator;
+    }
+    write(buffer, VERBOSE);
+}
+
+void logger::debug(std::vector<std::string> message) {
+    std::string buffer;
+    for (auto iterator : message) {
+        buffer += iterator;
+    }
+    write(buffer, DEBUG);
+}
+
+void logger::standard(std::vector<std::string> message) {
+    std::string buffer;
+    for (auto iterator : message) {
+        buffer += iterator;
+    }
+    write(buffer, STANDARD);
+}
+
+void logger::fatal(std::vector<std::string> message) {
+    std::string buffer;
+    for (auto iterator : message) {
+        buffer += iterator;
+    }
+    write(buffer, FATAL);
+}
+
 void logger::set_level(logger_level level) {
     if (level > 3 || level < 0) {
         write("log level out of range", DEBUG);

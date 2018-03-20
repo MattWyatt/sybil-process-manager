@@ -27,6 +27,7 @@ namespace sybil {
         inline void fork_success();
         inline void terminate_success();
         inline void terminate_failure();
+        inline void parent_routine();
         inline void child_routine();
 
     protected:

@@ -68,17 +68,7 @@ void process::execute() {
 
     //if we're in the parent process, announce success and set full command
     if (_pid > 0) {
-        _is_running = true;
-        //close in[read] and out[write]
-        close(_pipe->get_stdin()[PIPE_READ]);
-        close(_pipe->get_stdout()[PIPE_WRITE]);
-        std::string buffer;
-        buffer += _path;
-        for (auto arg : _args) {
-            buffer += " ";
-            buffer += arg;
-        }
-        _running_command = buffer;
+        parent_routine();
         fork_success();
     }
 
@@ -108,21 +98,35 @@ void process::terminate() {
 }
 
 inline void process::start_error() {
-    logger::get()->write("something went wrong starting the process. throwing exception...", logger::FATAL);
+    logger::get()->fatal("something went wrong starting the process. throwing exception...");
     throw sybil::process_start_error();
 }
 
 inline void process::fork_success() {
-    logger::get()->write("successfully forked child process", logger::DEBUG);
+    logger::get()->debug("successfully forked child process");
 }
 
 inline void process::terminate_success() {
-    logger::get()->write("successfully stopped child process", logger::DEBUG);
+    logger::get()->debug("successfully stopped child process");
 }
 
 inline void process::terminate_failure() {
-    logger::get()->write("something went wrong when stopping the process. throwing exception...", logger::FATAL);
+    logger::get()->fatal("something went wrong when stopping the process. throwing exception...");
     throw sybil::process_termination_error();
+}
+
+inline void process::parent_routine() {
+    _is_running = true;
+    //close in[read] and out[write]
+    close(_pipe->get_stdin()[PIPE_READ]);
+    close(_pipe->get_stdout()[PIPE_WRITE]);
+    std::string buffer;
+    buffer += _path;
+    for (auto arg : _args) {
+        buffer += " ";
+        buffer += arg;
+    }
+    _running_command = buffer;
 }
 
 inline void process::child_routine() {

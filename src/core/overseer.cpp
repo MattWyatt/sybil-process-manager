@@ -29,7 +29,7 @@ void overseer::stop() {
 }
 
 std::string overseer::read_process() {
-    std::string t;
+    std::string process_output = "";
     char cChar;
     int result;
     while(true) {
@@ -38,14 +38,16 @@ std::string overseer::read_process() {
             break;
         }
         logger::get()->verbose(std::to_string(cChar));
-        t += cChar;
+        process_output += cChar;
     }
-    logger::get()->standard(t);
-    return "H";
+    return process_output;
 }
 
 void overseer::write_process(std::string message) {
-    write(_process->_pipe->get_stdin()[PIPE_WRITE], message.c_str(), strlen(message.c_str()));
+    std::string send = message;
+    send += "\n\r";
+    logger::get()->debug(send);
+    write(_process->_pipe->get_stdin()[PIPE_WRITE], send.c_str(), strlen(send.c_str()));
 }
 
 bool overseer::is_running() {
