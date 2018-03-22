@@ -1,10 +1,9 @@
 #ifndef SYBIL_PROCESS_MANAGER_SYBLING_H
 #define SYBIL_PROCESS_MANAGER_SYBLING_H
 
-
+#include <core/process_pipe.h>
 #include <string>
 #include <vector>
-#include <core/process_pipe.h>
 
 namespace sybil {
     class process {

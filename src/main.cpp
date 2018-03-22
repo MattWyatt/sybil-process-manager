@@ -1,9 +1,9 @@
-#include <iostream>
-#include <chrono>
-#include <thread>
 #include <core/process.h>
 #include <core/logger.h>
 #include <core/overseer.h>
+#include <iostream>
+#include <chrono>
+#include <thread>
 
 /*
  * main.cpp is currently just the testing file for this project.

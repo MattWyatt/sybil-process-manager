@@ -1,8 +1,8 @@
 #ifndef SYBIL_PROCESS_MANAGER_OVERSEER_H
 #define SYBIL_PROCESS_MANAGER_OVERSEER_H
 
+#include <core/process.h>
 #include <atomic>
-#include "process.h"
 
 namespace sybil {
     class overseer  {

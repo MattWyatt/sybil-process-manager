@@ -1,5 +1,5 @@
-#include "overseer.h"
-#include "logger.h"
+#include <core/overseer.h>
+#include <core/logger.h>
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
@@ -56,6 +56,11 @@ void overseer::write_process(std::string message) {
     write(_process->_pipe->get_stdin()[PIPE_WRITE], send.c_str(), strlen(send.c_str()));
 }
 
+/*
+ * listen for whatever reason this works, so don't touch it.
+ * if you pass the overseer as a reference, instead of as the object itself,
+ * then nothing gets deleted
+ */
 void overseer::read_thread(overseer* o) {
     std::thread reader(&overseer::read_process, o);
     reader.detach();
