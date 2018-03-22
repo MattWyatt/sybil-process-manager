@@ -2,7 +2,6 @@
 #define SYBIL_PROCESS_MANAGER_SYBLING_H
 
 
-
 #include <string>
 #include <vector>
 #include <core/process_pipe.h>

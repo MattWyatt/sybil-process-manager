@@ -21,3 +21,8 @@ endforeach(dir)
 list(APPEND SOURCE "${SRCS}")
 message(STATUS "SOURCES: ${SOURCE}")
 add_executable(sybil ./main.cpp ${SOURCE})
+
+# link pthreads
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(sybil Threads::Threads)

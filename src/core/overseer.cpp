@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
+#include <thread>
 
 using namespace sybil;
 
@@ -39,8 +40,13 @@ std::string overseer::read_process() {
         }
         logger::get()->verbose(std::to_string(cChar));
         process_output += cChar;
+        _stdout.store((char*)process_output.c_str(), std::memory_order_seq_cst);
     }
     return process_output;
+}
+
+std::string overseer::get_output() {
+    return std::string(_stdout.load(std::memory_order_seq_cst));
 }
 
 void overseer::write_process(std::string message) {
@@ -48,6 +54,11 @@ void overseer::write_process(std::string message) {
     send += "\n\r";
     logger::get()->debug(send);
     write(_process->_pipe->get_stdin()[PIPE_WRITE], send.c_str(), strlen(send.c_str()));
+}
+
+void overseer::read_thread(overseer* o) {
+    std::thread reader(&overseer::read_process, o);
+    reader.detach();
 }
 
 bool overseer::is_running() {
