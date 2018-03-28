@@ -1,30 +1,8 @@
-#include <core/process.h>
-#include <core/logger.h>
-#include <core/overseer.h>
-#include <iostream>
-#include <chrono>
-#include <thread>
-
 /*
- * main.cpp is currently just the testing file for this project.
- * in the coming months this file will completely change.
+ * testing files have been moved to /tests for the sake of organization
  */
 
 
 int main() {
-    sybil::logger::get()->set_level(sybil::logger::DEBUG);
-    sybil::logger::get()->standard("starting sybil...");
-
-    std::string process = "/bin/sh";
-    sybil::process* sy = new sybil::process(process);
-    sybil::overseer o(sy);
-    o.begin();
-    sybil::overseer::read_thread(&o);
-    o.write_process("touch somefile.txt");
-    sybil::logger::get()->debug({"called execute with: ", o.get_running_command()});
-    sybil::logger::get()->debug("about to call terminate()...");
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    //o.stop();
-    sybil::logger::get()->standard({"child process output: \n", o.get_output()});
-    return 0;
+    // nothing here :P
 }
