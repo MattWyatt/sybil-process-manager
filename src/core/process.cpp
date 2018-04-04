@@ -140,7 +140,7 @@ inline void process::child_routine() {
     if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDERR_FILENO) == -1) {
         logger::get()->fatal("failed to redirect standard error output!");
     }
-    //close all pipes to the child process, they're only to be accessed by the overseer
+    //close all pipes to the child process, they're only to be accessed by the sybling
     if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
     close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
     close(_pipe->get_stdout()[PIPE_READ]) == -1 ||

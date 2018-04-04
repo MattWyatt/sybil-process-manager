@@ -1,6 +1,6 @@
 #include <core/process.h>
 #include <core/logger.h>
-#include <core/overseer.h>
+#include <core/sybling.h>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -17,9 +17,9 @@ int main() {
 
     std::string process = "/bin/sh";
     sybil::process* sy = new sybil::process(process);
-    sybil::overseer o(sy);
+    sybil::sybling o(sy);
     o.begin();
-    sybil::overseer::read_thread(&o);
+    sybil::sybling::read_thread(&o);
     o.write_process("touch somefile.txt");
     sybil::logger::get()->debug({"called execute with: ", o.get_running_command()});
     sybil::logger::get()->debug("about to call terminate()...");

@@ -1,4 +1,4 @@
-#include <core/overseer.h>
+#include <core/sybling.h>
 #include <core/logger.h>
 #include <unistd.h>
 #include <iostream>
@@ -7,29 +7,29 @@
 
 using namespace sybil;
 
-overseer::overseer(process* process) {
+sybling::sybling(process* process) {
     _process = process;
 }
 
-overseer::overseer(std::string path) {
+sybling::sybling(std::string path) {
     process* p = new process(path);
     _process = p;
 }
 
-overseer::overseer(std::string path, std::vector<std::string> args) {
+sybling::sybling(std::string path, std::vector<std::string> args) {
     process* p = new process(path, args);
     _process = p;
 }
 
-void overseer::begin() {
+void sybling::begin() {
     _process->execute();
 }
 
-void overseer::stop() {
+void sybling::stop() {
     _process->terminate();
 }
 
-std::string overseer::read_process() {
+std::string sybling::read_process() {
     std::string process_output = "";
     char cChar;
     int result;
@@ -45,11 +45,11 @@ std::string overseer::read_process() {
     return process_output;
 }
 
-std::string overseer::get_output() {
+std::string sybling::get_output() {
     return std::string(_stdout.load(std::memory_order_seq_cst));
 }
 
-void overseer::write_process(std::string message) {
+void sybling::write_process(std::string message) {
     std::string send = message;
     send += "\n\r";
     logger::get()->debug(send);
@@ -58,22 +58,22 @@ void overseer::write_process(std::string message) {
 
 /*
  * listen for whatever reason this works, so don't touch it.
- * if you pass the overseer as a reference, instead of as the object itself,
+ * if you pass the sybling as a reference, instead of as the object itself,
  * then nothing gets deleted
  */
-void overseer::read_thread(overseer* o) {
-    std::thread reader(&overseer::read_process, o);
+void sybling::read_thread(sybling* o) {
+    std::thread reader(&sybling::read_process, o);
     reader.detach();
 }
 
-bool overseer::is_running() {
+bool sybling::is_running() {
     return _process->_is_running;
 }
 
-int overseer::get_pid() {
+int sybling::get_pid() {
     return _process->_pid;
 }
 
-std::string overseer::get_running_command() {
+std::string sybling::get_running_command() {
     return _process->_running_command;
 }

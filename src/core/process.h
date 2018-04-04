@@ -7,7 +7,7 @@
 
 namespace sybil {
     class process {
-        friend class overseer;
+        friend class sybling;
     private:
         std::string _path;
         process_pipe* _pipe;

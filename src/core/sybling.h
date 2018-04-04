@@ -5,22 +5,22 @@
 #include <atomic>
 
 namespace sybil {
-    class overseer  {
+    class sybling  {
     private:
         sybil::process* _process;
         std::atomic<char*> _stdout;
 
     public:
-        overseer(sybil::process* process);
-        overseer(std::string path);
-        overseer(std::string path, std::vector<std::string> args);
+        sybling(sybil::process* process);
+        sybling(std::string path);
+        sybling(std::string path, std::vector<std::string> args);
 
         void begin();
         void stop();
         std::string read_process();
         std::string get_output();
         void write_process(std::string message);
-        static void read_thread(overseer* o);
+        static void read_thread(sybling* o);
 
         //duplicated functions from the friend process
         bool is_running();

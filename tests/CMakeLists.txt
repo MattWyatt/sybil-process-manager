@@ -22,3 +22,8 @@ add_executable(file_test file_test.cpp ${SOURCE})
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(file_test Threads::Threads)
+
+add_executable(daemon_start_test daemon_start_test.cpp ${SOURCE})
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(daemon_start_test Threads::Threads)

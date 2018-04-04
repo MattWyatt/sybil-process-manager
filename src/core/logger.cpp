@@ -34,7 +34,7 @@ void logger::write(std::string message, logger_level level) {
     if (level >= _log_level) {
         std::cout << timestamp << _prefixes.at(level) << message << std::endl;
     }
-    std::ofstream file("sybil.log", std::ios::app);
+    std::ofstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"), std::ios::app);
     if (file.is_open()) {
         file << timestamp << _prefixes.at(level) << message << std::endl;
     }
@@ -101,7 +101,7 @@ void logger::set_level(logger_level level) {
 }
 
 std::vector<std::string> logger::latest(int count) {
-    std::ifstream file("sybil.log");
+    std::ifstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"));
     std::string line_buffer;
     std::vector<std::string> lines;
     if (file.is_open()) {
