@@ -12,6 +12,7 @@
 
 class daemon {
 private:
+    bool _exit = false;
     std::vector<sybil::sybling> _syblings;
     inline void daemon_routine();
 

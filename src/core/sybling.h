@@ -8,6 +8,7 @@ namespace sybil {
     class sybling  {
     private:
         sybil::process* _process;
+        std::string _name;
         std::atomic<char*> _stdout;
 
     public:
@@ -17,6 +18,8 @@ namespace sybil {
 
         void begin();
         void stop();
+        void set_name(std::string name);
+        std::string get_name();
         std::string read_process();
         std::string get_output();
         void write_process(std::string message);

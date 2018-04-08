@@ -29,6 +29,14 @@ void sybling::stop() {
     _process->terminate();
 }
 
+void sybling::set_name(std::string name) {
+    _name = name;
+}
+
+std::string sybling::get_name() {
+    return _name;
+}
+
 std::string sybling::read_process() {
     std::string process_output = "";
     char cChar;
