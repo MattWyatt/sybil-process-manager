@@ -10,6 +10,7 @@ namespace sybil {
         sybil::process* _process;
         std::string _name;
         std::atomic<char*> _stdout;
+        bool _read_thread_running;
 
     public:
         sybling(sybil::process* process);
@@ -18,14 +19,17 @@ namespace sybil {
 
         void begin();
         void stop();
+        void wait_for_exit();
+        bool is_stopped();
         void set_name(std::string name);
         std::string get_name();
-        std::string read_process();
+        void read_process();
         std::string get_output();
         void write_process(std::string message);
+        bool is_reading();
         static void read_thread(sybling* o);
 
-        //duplicated functions from the friend process
+        /* duplicated functions from the friend process */
         bool is_running();
         pid_t get_pid();
         std::string get_running_command();

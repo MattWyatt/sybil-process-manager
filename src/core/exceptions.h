@@ -1,3 +1,8 @@
+/*
+ * list of fatal exceptions
+ * any of these, if thrown, will terminate the process
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_EXCEPTIONS_H
 #define SYBIL_PROCESS_MANAGER_EXCEPTIONS_H
 

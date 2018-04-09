@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <thread>
+#include <wait.h>
 
 using namespace sybil;
 
@@ -29,6 +30,15 @@ void sybling::stop() {
     _process->terminate();
 }
 
+void sybling::wait_for_exit() {
+    int status_ptr;
+    waitpid(_process->get_pid(), &status_ptr, 0);
+}
+
+bool sybling::is_stopped() {
+    return !is_running();
+}
+
 void sybling::set_name(std::string name) {
     _name = name;
 }
@@ -37,24 +47,29 @@ std::string sybling::get_name() {
     return _name;
 }
 
-std::string sybling::read_process() {
-    std::string process_output = "";
+/*
+ * blocking call that retrieves all output of a process
+ */
+void sybling::read_process() {
+    std::string process_output;
     char cChar;
     int result;
+    /*
+     * read character by character and store it in process_output
+     * each time the output is updated, store it in the atomic
+     */
     while(true) {
         result = read(_process->_pipe->get_stdout()[PIPE_READ], &cChar, 1);
         if (result != 1) {
             break;
         }
-        logger::get()->verbose(std::to_string(cChar));
         process_output += cChar;
         _stdout.store((char*)process_output.c_str(), std::memory_order_seq_cst);
     }
-    return process_output;
 }
 
 std::string sybling::get_output() {
-    return std::string(_stdout.load(std::memory_order_seq_cst));
+    return std::string(_stdout.load(std::memory_order_relaxed));
 }
 
 void sybling::write_process(std::string message) {
@@ -62,6 +77,10 @@ void sybling::write_process(std::string message) {
     send += "\n\r";
     logger::get()->debug(send);
     write(_process->_pipe->get_stdin()[PIPE_WRITE], send.c_str(), strlen(send.c_str()));
+}
+
+bool sybling::is_reading() {
+    return _read_thread_running;
 }
 
 /*
@@ -72,10 +91,18 @@ void sybling::write_process(std::string message) {
 void sybling::read_thread(sybling* o) {
     std::thread reader(&sybling::read_process, o);
     reader.detach();
+    o->_read_thread_running = true;
 }
 
 bool sybling::is_running() {
-    return _process->_is_running;
+    while(waitpid(-1, nullptr, WNOHANG) > 0) {
+        // Wait for defunct....
+    }
+
+    if (0 == kill(_process->get_pid(), 0))
+        return true; // Process exists
+
+    return false;
 }
 
 int sybling::get_pid() {

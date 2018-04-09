@@ -2,9 +2,9 @@
 #include <core/process.h>
 #include <core/logger.h>
 #include <unistd.h>
+#include <wait.h>
 #include <csignal>
 #include <iostream>
-#include <wait.h>
 
 using namespace sybil;
 
@@ -41,6 +41,9 @@ std::vector<std::string> process::get_args() {
 }
 
 bool process::is_running() {
+    if (kill(_pid, 0) == 0 && _is_running) {
+        _is_running = false;
+    }
     return _is_running;
 }
 
@@ -72,7 +75,7 @@ void process::execute() {
         fork_success();
     }
 
-    //if we're in the child process, execute the child
+    // if we're in the child process, execute the child
     if (is_child()) {
         _pid = getpid();
         child_routine();
@@ -161,6 +164,7 @@ inline void process::child_routine() {
         }
         v_args.push_back(nullptr);
         auto p_args = v_args.data(); //store the raw array in p_args
+        _is_running = true;
         auto result = execvp(p_name, p_args);
         if (result < 0) {
             logger::get()->write("execvp execution error", logger::DEBUG);
@@ -174,8 +178,10 @@ inline void process::child_routine() {
                 logger::get()->fatal("failed to close child pipes!");
             }
         }
+        logger::get()->verbose("closed child pipes!");
     }
     else { //if no arguments, just run execl
+        _is_running = true;
         if (execl(p_name, nullptr) < 0) {
             logger::get()->debug("execl execution error");
             throw sybil::process_execution_error();
@@ -187,6 +193,7 @@ inline void process::child_routine() {
                 close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
                 logger::get()->fatal("failed to close child pipes!");
             }
+            logger::get()->verbose("closed child pipes!");
         }
     }
 }

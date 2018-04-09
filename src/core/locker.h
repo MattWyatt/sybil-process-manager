@@ -1,14 +1,14 @@
+/*
+ * class to create and represent a lock on a file
+ * used by the daemon process to keep a singleton instance of the actual process
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_LOCKER_H
 #define SYBIL_PROCESS_MANAGER_LOCKER_H
 
 #include <string>
 
 namespace sybil {
-
-    /*
-     * class to create and represent a lock on a file
-     * used by the daemon process to keep a singleton instance of the actual process
-     */
     class locker {
     private:
         std::string _path;

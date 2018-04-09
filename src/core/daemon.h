@@ -10,19 +10,21 @@
 #include <core/sybling.h>
 #include <vector>
 
-class daemon {
-private:
-    bool _exit = false;
-    std::vector<sybil::sybling> _syblings;
-    inline void daemon_routine();
+namespace sybil {
+    class daemon {
+    private:
+        bool _exit = false;
+        std::vector<sybil::sybling> _syblings;
+        inline void daemon_routine();
 
-protected:
-    void create_sybling();
-    void terminate_sybling();
+    protected:
+        void create_sybling();
+        void terminate_sybling();
 
-public:
-    daemon();
-};
+    public:
+        daemon();
+    };
+}
 
 
 #endif //SYBIL_PROCESS_MANAGER_DAEMON_H

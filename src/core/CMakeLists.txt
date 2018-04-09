@@ -9,4 +9,5 @@ set(SRCS process.cpp
         process_pipe.cpp
         daemon.cpp
         locker.cpp
-        named_pipe.cpp)
+        named_pipe.cpp
+        process_logger.cpp)

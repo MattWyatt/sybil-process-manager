@@ -15,18 +15,18 @@ daemon::daemon() {
 
     const int pid = fork();
 
-    // error
+    /* fork error */
     if (pid == -1) {
         throw daemon_start_error();
     }
 
-    // parent routine
+    /* parent process */
     if (pid > 0) {
         logger::get()->debug({"successfully spawned daemon watcher! id: [", std::to_string(pid), "]"});
         exit(0);
     }
 
-    // child routine
+    /* child process */
     if (pid == 0) {
         logger::get()->debug("beginning daemon watcher routine...");
         daemon_routine();
@@ -46,7 +46,8 @@ inline void daemon::daemon_routine() {
     /* change to root dir to prevent blocking any mount calls */
     chdir("/");
 
-    /* create a locker on /tmp/sybil.pid
+    /*
+     * create a locker on /tmp/sybil.pid
      * check to see if it is locked
      * if it is, then exit because that means a daemon is already running
      */

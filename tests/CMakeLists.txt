@@ -27,3 +27,13 @@ add_executable(daemon_start_test daemon_start_test.cpp ${SOURCE})
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(daemon_start_test Threads::Threads)
+
+add_executable(reader_test reader_test.cpp ${SOURCE})
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(reader_test Threads::Threads)
+
+add_executable(multistart_test multistart_test.cpp ${SOURCE})
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(multistart_test Threads::Threads)
