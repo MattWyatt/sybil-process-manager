@@ -64,18 +64,18 @@ std::string process::get_running_command() {
 
 void process::execute() {
     _pid = fork();
-    //if everything went wrong, throw an exception
+    /* if everything went wrong, throw an exception */
     if (_pid == -1) {
         start_error();
     }
 
-    //if we're in the parent process, announce success and set full command
+    /* if we're in the parent process, announce success and set full command */
     if (_pid > 0) {
         parent_routine();
         fork_success();
     }
 
-    // if we're in the child process, execute the child
+    /* if we're in the child process, execute the child */
     if (is_child()) {
         _pid = getpid();
         child_routine();
@@ -133,7 +133,7 @@ inline void process::parent_routine() {
 }
 
 inline void process::child_routine() {
-    //redirect the input and output through pipes to the parent process
+    /* redirect the input and output through pipes to the parent process */
     if (dup2(_pipe->get_stdin()[PIPE_READ], STDIN_FILENO) == -1) {
         logger::get()->fatal("failed to redirect standard input!");
     }

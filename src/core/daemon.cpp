@@ -79,6 +79,7 @@ inline void daemon::daemon_routine() {
         if (command == "quit") {
             exit(0);
         }
-        logger::get()->debug(command);
+        logger::get()->debug({"command [", command, "] issued to daemon"});
+        _parse_and_handle(command);
     }
 }

@@ -2,7 +2,7 @@ project(sybil-process-manager)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # append any additional directories to this SET line
-set(DIRS core)
+set(DIRS core cli)
 
 foreach(dir ${DIRS})
     # add every subdirectory inside /src to the project
