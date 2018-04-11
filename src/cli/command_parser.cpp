@@ -45,7 +45,9 @@ int command_parser::parse(std::string command)  {
     if (split_command.at(0) != "new" &&
             split_command.at(0) != "start" &&
             split_command.at(0) != "stop" &&
-            split_command.at(0) != "send") {
+            split_command.at(0) != "send" &&
+            split_command.at(0) != "status" &&
+            split_command.at(0) != "quit") {
         return _error_codes::INVALID_COMMAND;
     }
     return 0;

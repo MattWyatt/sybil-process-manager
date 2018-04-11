@@ -1,13 +1,18 @@
 #include <cli/command_parser.h>
 #include <core/logger.h>
+#include <core/named_pipe.h>
 #include <core/daemon.h>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 
 int main(int argc, char* argv[]) {
     sybil::logger::get()->set_level(sybil::logger::STANDARD);
     sybil::daemon d;
+
+    sybil::named_pipe sybil_output("/tmp/sybil_console.pipe");
 
     std::vector<std::string> full_command;
     std::string final;
@@ -23,6 +28,15 @@ int main(int argc, char* argv[]) {
         std::cout << "error in command:" << std::endl << sybil::command_parser::get_error_message(code) << std::endl;
         return 0;
     }
+
+    else if (full_command.at(1) == "quit") {
+        std::ofstream pipe_writer("/tmp/sybil.pipe");
+        if (pipe_writer.is_open()) {
+            pipe_writer << "quit";
+            pipe_writer.close();
+        }
+    }
+
     else {
         final = "sybil ";
         full_command.erase(full_command.begin(), full_command.begin()+1);
@@ -36,6 +50,8 @@ int main(int argc, char* argv[]) {
             pipe_writer.close();
         }
         std::cout << final << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::cout << sybil_output.read() << std::endl;
         return 0;
     }
 }

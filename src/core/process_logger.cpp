@@ -46,7 +46,7 @@ std::string process_logger::get_name() {
         return _name;
     }
     std::string process_name = _sybling_ptr->get_name();
-    if (process_name.empty()) {
+    if (process_name.empty() && _sybling_ptr->is_running()) {
         process_name = _sybling_ptr->get_running_command();
 
         /*

@@ -20,10 +20,11 @@ namespace sybil {
         inline void daemon_routine();
 
     protected:
-        void create_sybling(std::string path, std::string name);
+        void create_sybling(std::string path, std::string name, std::vector<std::string> arg_list);
         void start_sybling(std::string name);
         void terminate_sybling(std::string name);
         void send_sybling(std::string name, std::string input);
+        std::string get_status(std::string name);
 
     public:
         daemon();

@@ -13,11 +13,17 @@ process::process(std::string path, std::vector<std::string> args) {
     _args = args;
     _pipe = new process_pipe();
 
+    _running_command = path;
+    for (auto iterator : _args) {
+        _running_command += " ";
+        _running_command += iterator;
+    }
     _has_args = true;
 }
 
 process::process(std::string path) {
     _path = path;
+    _running_command = _path;
     _has_args = false;
     _pipe = new process_pipe();
 }
@@ -63,6 +69,11 @@ std::string process::get_running_command() {
 }
 
 void process::execute() {
+    _running_command = "";
+    for (auto iterator : _args) {
+        _running_command += iterator;
+        _running_command += " ";
+    }
     _pid = fork();
     /* if everything went wrong, throw an exception */
     if (_pid == -1) {

@@ -26,6 +26,8 @@ namespace sybil {
         std::string get_name();
         void read_process();
         std::string get_output();
+        int get_cpu_usage();
+        int get_mem_usage();
         void write_process(std::string message);
         bool is_reading();
         static void read_thread(sybling* o);

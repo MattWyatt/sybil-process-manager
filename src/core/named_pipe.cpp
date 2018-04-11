@@ -23,6 +23,14 @@ void named_pipe::write(std::string text) {
     }
 }
 
+void named_pipe::write(std::vector<std::string> text) {
+    std::string buffer;
+    for (auto iterator : text) {
+        buffer += iterator;
+    }
+    write(buffer);
+}
+
 void named_pipe::clear_file() {
     std::ofstream pipe_clearer(_path, std::ios::trunc);
     if (pipe_clearer.is_open()) {
