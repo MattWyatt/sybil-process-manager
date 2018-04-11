@@ -17,6 +17,7 @@ sybling::sybling(std::string path) {
     _process = p;
 }
 
+
 sybling::sybling(std::string path, std::vector<std::string> args) {
     process* p = new process(path, args);
     _process = p;
@@ -51,25 +52,29 @@ std::string sybling::get_name() {
  * blocking call that retrieves all output of a process
  */
 void sybling::read_process() {
+    logger::get()->verbose("read_process() called");
     std::string process_output;
     char cChar;
     int result;
+
     /*
      * read character by character and store it in process_output
-     * each time the output is updated, store it in the atomic
+     * each time the output is updated, store it in _stdout
      */
     while(true) {
         result = read(_process->_pipe->get_stdout()[PIPE_READ], &cChar, 1);
         if (result != 1) {
+            logger::get()->debug("no output left in process!");
             break;
         }
         process_output += cChar;
-        _stdout.store((char*)process_output.c_str(), std::memory_order_seq_cst);
+        _stdout += cChar;
+        logger::get()->verbose({"_stdout: ", _stdout});
     }
 }
 
 std::string sybling::get_output() {
-    return std::string(_stdout.load(std::memory_order_relaxed));
+    return _stdout;
 }
 
 void sybling::write_process(std::string message) {

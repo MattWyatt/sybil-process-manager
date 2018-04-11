@@ -9,7 +9,8 @@ namespace sybil {
     private:
         sybil::process* _process;
         std::string _name;
-        std::atomic<char*> _stdout;
+        std::string _stdout;
+        //std::atomic<char*> _stdout;
         bool _read_thread_running;
 
     public:

@@ -1,7 +1,8 @@
 project(sybil-process-manager)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-set(DIRS ../src/core)
+set(DIRS ../src/core
+         ../src/cli)
 foreach(dir ${DIRS})
     # grab all source files for each folder inside /src
     get_directory_property(DIR_SRCS DIRECTORY ${dir} DEFINITION SRCS)

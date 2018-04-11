@@ -36,7 +36,7 @@ std::string named_pipe::read() {
 
     /*
      * check if the pipe file actually exists
-     * if it doesn't, create it log errno
+     * if it doesn't, create it and log errno
      */
     if (!pipe_reader.good()) {
         pipe_reader.close();

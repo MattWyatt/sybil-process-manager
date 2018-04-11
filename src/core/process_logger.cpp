@@ -7,6 +7,7 @@ using namespace sybil;
 
 process_logger::process_logger(sybling* sybling_ptr) {
     _sybling_ptr = sybling_ptr;
+    _sybling_ptr->get_name();
 }
 
 void process_logger::_writer() {
@@ -14,11 +15,19 @@ void process_logger::_writer() {
     std::string log_path = get_path();
     std::ofstream log_file;
 
+    /*
+     * go ahead and create the logfile
+     */
+    log_file.open(log_path, std::ios::out | std::ios::trunc);
+    log_file << "";
+    log_file.close();
+
     while (!_quit_logging) {
 
         /* truncate the entire file each time. this should be optimized later */
         std::string output = _sybling_ptr->get_output();
-        if (_sybling_ptr->is_running() && !output.empty()) {
+        if (!output.empty()) {
+            logger::get()->verbose("found output, writing it to file!");
             log_file.open(log_path, std::ios::out | std::ios::trunc);
             if (!log_file.is_open()) {
                 logger::get()->fatal({"error opening process log file for [", log_path, "]"});
@@ -51,6 +60,7 @@ std::string process_logger::get_name() {
     return _name;
 }
 
+
 std::string process_logger::get_path() {
     if (!_path.empty()) {
         return _path;
@@ -63,6 +73,10 @@ std::string process_logger::get_path() {
     std::string log_path = home_dir + _name + ".log";
     _path = log_path;
     return _path;
+}
+
+std::string process_logger::get_sybling_name() {
+    return _sybling_ptr->get_name();
 }
 
 /* start logger on a separate thread */

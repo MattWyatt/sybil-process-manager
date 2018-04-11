@@ -17,10 +17,10 @@ namespace sybil {
         bool _quit_logging;
         std::string _name;
         std::string _path;
-        void _writer();
 
     public:
         process_logger(sybling* sybling_ptr);
+        void _writer();
 
         /*
          * will return false if it fails to start
@@ -29,6 +29,7 @@ namespace sybil {
         static bool start_logger(process_logger* pl);
         std::string get_name();
         std::string get_path();
+        std::string get_sybling_name();
         void stop_logger();
     };
 }

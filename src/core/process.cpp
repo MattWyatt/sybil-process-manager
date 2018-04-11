@@ -69,11 +69,13 @@ void process::execute() {
         start_error();
     }
 
-    /* if we're in the parent process, announce success and set full command */
+    /*
+    /* if we're in the parent process, announce success and set full command
     if (_pid > 0) {
         parent_routine();
         fork_success();
     }
+    */
 
     /* if we're in the child process, execute the child */
     if (is_child()) {
@@ -102,7 +104,7 @@ void process::terminate() {
 
 inline void process::start_error() {
     logger::get()->fatal("something went wrong starting the process. throwing exception...");
-    throw sybil::process_start_error();
+    // throw sybil::process_start_error();
 }
 
 inline void process::fork_success() {
@@ -115,7 +117,7 @@ inline void process::terminate_success() {
 
 inline void process::terminate_failure() {
     logger::get()->fatal("something went wrong when stopping the process. throwing exception...");
-    throw sybil::process_termination_error();
+    // throw sybil::process_termination_error();
 }
 
 inline void process::parent_routine() {
@@ -155,7 +157,7 @@ inline void process::child_routine() {
     //create C-style types of path and args
     auto p_name = _path.c_str(); //should become char*
 
-    std::cout << "[child process] attempting to turn over control to given process image...\n";
+    logger::get()->debug("[child process] attempting to turn over control to given process image...");
     if (_has_args) { //run execvp if there are arguments to be run with the program
         std::vector<char*> v_args; //C-style-character vector for the arguments
         v_args.reserve(_args.size());
@@ -167,8 +169,8 @@ inline void process::child_routine() {
         _is_running = true;
         auto result = execvp(p_name, p_args);
         if (result < 0) {
-            logger::get()->write("execvp execution error", logger::DEBUG);
-            throw sybil::process_execution_error();
+            logger::get()->debug({"execvp execution error [", std::to_string(result), "]"});
+            // throw sybil::process_execution_error();
         }
         else {
             if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
@@ -182,9 +184,10 @@ inline void process::child_routine() {
     }
     else { //if no arguments, just run execl
         _is_running = true;
-        if (execl(p_name, nullptr) < 0) {
-            logger::get()->debug("execl execution error");
-            throw sybil::process_execution_error();
+        int status = execl(p_name, nullptr);
+        if (status < 0) {
+            logger::get()->debug({"execl execution error [", std::to_string(status), "]"});
+            // throw sybil::process_execution_error();
         }
         else {
             if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
