@@ -23,6 +23,7 @@ namespace sybil {
         void create_sybling(std::string path, std::string name);
         void start_sybling(std::string name);
         void terminate_sybling(std::string name);
+        void send_sybling(std::string name, std::string input);
 
     public:
         daemon();

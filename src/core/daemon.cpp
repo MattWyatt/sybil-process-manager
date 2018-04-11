@@ -82,6 +82,15 @@ void daemon::terminate_sybling(std::string name) {
     }
 }
 
+void daemon::send_sybling(std::string name, std::string input) {
+    for (auto iterator : _syblings) {
+        if (iterator->get_name() == name) {
+            logger::get()->standard({"sending [", input, "] to sybling [", name, "]"});
+            iterator->write_process(input);
+        }
+    }
+}
+
 inline void daemon::daemon_routine() {
 
     /* new file perms and process group */
@@ -154,6 +163,16 @@ inline void daemon::daemon_routine() {
         else if (w_cmd.at(0) == "stop") {
             terminate_sybling(w_cmd.at(1));
             logger::get()->standard({"terminate sybling [", w_cmd.at(1), "]"});
+        }
+        else if (w_cmd.at(0) == "send") {
+            std::string name = w_cmd.at(1);
+            w_cmd.erase(w_cmd.begin(), w_cmd.begin()+2);
+            std::string final;
+            for (auto iterator : w_cmd) {
+                final += iterator;
+                final += " ";
+            }
+            send_sybling(name, final);
         }
     }
 }

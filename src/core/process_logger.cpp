@@ -27,7 +27,6 @@ void process_logger::_writer() {
         /* truncate the entire file each time. this should be optimized later */
         std::string output = _sybling_ptr->get_output();
         if (!output.empty()) {
-            logger::get()->verbose("found output, writing it to file!");
             log_file.open(log_path, std::ios::out | std::ios::trunc);
             if (!log_file.is_open()) {
                 logger::get()->fatal({"error opening process log file for [", log_path, "]"});

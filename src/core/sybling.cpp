@@ -79,7 +79,7 @@ std::string sybling::get_output() {
 
 void sybling::write_process(std::string message) {
     std::string send = message;
-    send += "\n\r";
+    send += "\n";
     logger::get()->debug(send);
     write(_process->_pipe->get_stdin()[PIPE_WRITE], send.c_str(), strlen(send.c_str()));
 }
