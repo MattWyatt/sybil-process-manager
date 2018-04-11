@@ -33,12 +33,12 @@ void logger::write(std::string message, logger_level level) {
     //end timestamp creation
     if (level >= _log_level) {
         std::cout << timestamp << _prefixes.at(level) << message << std::endl;
+        std::ofstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"), std::ios::app);
+        if (file.is_open()) {
+            file << timestamp << _prefixes.at(level) << message << std::endl;
+        }
+        file.close();
     }
-    std::ofstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"), std::ios::app);
-    if (file.is_open()) {
-        file << timestamp << _prefixes.at(level) << message << std::endl;
-    }
-    file.close();
 }
 
 void logger::verbose(std::string message) {
