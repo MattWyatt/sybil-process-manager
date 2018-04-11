@@ -23,8 +23,7 @@ namespace sybil {
          * these can be matched with their corresponding error message
          */
         enum _error_codes  {
-            COMMAND_GOOD,
-            NO_ARGV_0,
+            COMMAND_GOOD=1,
             INVALID_COMMAND,
             INVALID_ARGUMENT
         };
@@ -32,6 +31,7 @@ namespace sybil {
     public:
         static std::string extract_command(std::string full_command);
         static std::vector<std::string> split_command(std::string full_command);
+        static std::string get_error_message(int error_code);
         static int parse(std::string command);
     };
 }

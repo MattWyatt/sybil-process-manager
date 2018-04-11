@@ -22,12 +22,6 @@ daemon::daemon() {
         throw daemon_start_error();
     }
 
-    /* parent process */
-    if (pid > 0) {
-        logger::get()->debug({"successfully spawned daemon watcher! id: [", std::to_string(pid), "]"});
-        exit(0);
-    }
-
     /* child process */
     if (pid == 0) {
         logger::get()->debug("beginning daemon watcher routine...");

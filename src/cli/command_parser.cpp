@@ -6,7 +6,6 @@ using namespace sybil;
 
 std::vector<std::string> command_parser::_error_messages = {
     "COMMAND GOOD",
-    "NO ARGUMENT ZERO",
     "INVALID COMMAND",
     "INVALID ARGUMENT PASSED"
 };
@@ -25,17 +24,11 @@ std::vector<std::string> command_parser::split_command(std::string full_command)
     return split_command;
 }
 
+std::string command_parser::get_error_message(int error_code) {
+    return _error_messages.at(error_code-1);
+}
+
 int command_parser::parse(std::string command)  {
-
-    /*
-     * check for validity of argv[0]
-     * if this fails we've a serious problem
-     * this could be a redundant statement
-     */
-    if (command.substr(0, command.find(' ')) != "sybil") {
-        return _error_codes::NO_ARGV_0;
-    }
-
     /*
      * split the command into words and store them in a vector
      * this will allow for individual parsing of each command and it's arguments
@@ -52,7 +45,8 @@ int command_parser::parse(std::string command)  {
     if (split_command.at(0) != "new" &&
             split_command.at(0) != "start" &&
             split_command.at(0) != "stop" &&
-            split_command.at(0) != "status") {
+            split_command.at(0) != "send") {
         return _error_codes::INVALID_COMMAND;
     }
+    return 0;
 }
