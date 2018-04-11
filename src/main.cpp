@@ -12,6 +12,11 @@ int main(int argc, char* argv[]) {
     sybil::logger::get()->set_level(sybil::logger::STANDARD);
     sybil::daemon d;
 
+    if (argc == 1) {
+        std::cout << "no command supplied. quitting..." << std::endl;
+        return 0;
+    }
+
     sybil::named_pipe sybil_output("/tmp/sybil_console.pipe");
 
     std::vector<std::string> full_command;
