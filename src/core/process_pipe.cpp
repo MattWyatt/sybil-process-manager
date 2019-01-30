@@ -2,27 +2,28 @@
 #include <core/logger.h>
 #include <unistd.h>
 
-using namespace sybil;
-
-process_pipe::process_pipe() {
-    _stdinput = new int[2];
-    _stdoutput = new int[2];
-    if (pipe(_stdinput) < 0) {
-        logger::get()->fatal("failed to create standard input process_pipe!");
-        return;
+sybil::process_pipe::process_pipe() {
+    if (pipe(_input_pipe) < 0) {
+        throw "error creating input pipe";
     }
-    if (pipe(_stdoutput) < 0) {
-        close(_stdinput[PIPE_READ]);
-        close(_stdinput[PIPE_WRITE]);
-        logger::get()->fatal("failed to create standard output pipe!");
-        return;
+
+    if (pipe(_output_pipe) < 0) {
+        throw "error creating output pipe";
     }
 }
 
-int* process_pipe::get_stdin() {
-    return _stdinput;
+int sybil::process_pipe::iread() {
+    return _input_pipe[0];
 }
 
-int* process_pipe::get_stdout() {
-    return _stdoutput;
+int sybil::process_pipe::iwrite() {
+    return _input_pipe[1];
+}
+
+int sybil::process_pipe::oread() {
+    return _output_pipe[0];
+}
+
+int sybil::process_pipe::owrite() {
+    return _output_pipe[1];
 }

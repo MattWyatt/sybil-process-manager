@@ -2,40 +2,24 @@
 #define SYBIL_PROCESS_MANAGER_OVERSEER_H
 
 #include <core/process.h>
-#include <atomic>
 
 namespace sybil {
     class sybling  {
     private:
-        sybil::process* _process;
+        std::unique_ptr<sybil::process> _process;
+
         std::string _name;
-        std::string _stdout;
-        //std::atomic<char*> _stdout;
-        bool _read_thread_running;
+
+        std::string _path;
 
     public:
-        sybling(sybil::process* process);
-        sybling(std::string path);
-        sybling(std::string path, std::vector<std::string> args);
+        sybling(std::string& name, std::string& path);
 
-        void begin();
-        void stop();
-        void wait_for_exit();
-        bool is_stopped();
-        void set_name(std::string name);
-        std::string get_name();
-        void read_process();
-        std::string get_output();
-        int get_cpu_usage();
-        int get_mem_usage();
-        void write_process(std::string message);
-        bool is_reading();
-        static void read_thread(sybling* o);
+        sybling(std::string& name, std::string& path, std::vector<std::string>& args);
 
-        /* duplicated functions from the friend process */
-        bool is_running();
-        pid_t get_pid();
-        std::string get_running_command();
+        const std::string& get_name() const;
+
+        const pid_t& get_pid() const;
     };
 }
 

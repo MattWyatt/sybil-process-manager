@@ -1,19 +1,26 @@
 #ifndef SYBIL_PROCESS_MANAGER_PIPE_H
 #define SYBIL_PROCESS_MANAGER_PIPE_H
 
-const int PIPE_READ = 0;
-const int PIPE_WRITE = 1;
-
 namespace sybil {
+
+    const int PIPE_READ = 0;
+    const int PIPE_WRITE = 1;
+
     class process_pipe {
     private:
-        int* _stdinput;
-        int* _stdoutput;
+        int _input_pipe[2];
+        int _output_pipe[2];
 
     public:
         process_pipe();
-        int* get_stdin();
-        int* get_stdout();
+
+        int iread();
+
+        int iwrite();
+
+        int oread();
+
+        int owrite();
     };
 }
 

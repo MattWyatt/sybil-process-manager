@@ -4,210 +4,86 @@
 #include <unistd.h>
 #include <wait.h>
 #include <csignal>
+#include <cstring>
 #include <iostream>
 
-using namespace sybil;
+std::vector<std::thread> sybil::process::_readers;
 
-process::process(std::string path, std::vector<std::string> args) {
-    _path = path;
-    _args = args;
-    _pipe = new process_pipe();
-
-    _running_command = path;
-    for (auto iterator : _args) {
-        _running_command += " ";
-        _running_command += iterator;
+void sybil::process::exit_processes() {
+    for (std::thread &r : _readers) {
+        r.join();
     }
-    _has_args = true;
 }
 
-process::process(std::string path) {
-    _path = path;
-    _running_command = _path;
-    _has_args = false;
-    _pipe = new process_pipe();
-}
+sybil::process::process(const std::function<void()> &_function) : _function(_function) {}
 
-void process::set_args(std::vector<std::string> args) {
-    _args = args;
-    if (!args.empty()) {
-        _has_args = true;
+void sybil::process::execute() {
+    int result = fork();
+    _pid = result;
+    if (result == -1) {
+        std::cerr << "error in fork!\nquitting!\n";
         return;
     }
-    _has_args = false;
-}
 
-void process::add_args(std::string arg) {
-    _args.push_back(arg);
-    _has_args = true;
-}
+    /* child process */
+    if (result == 0) {
+        /* close I/O so they don't interface with the calling terminal */
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
 
-std::vector<std::string> process::get_args() {
-    return _args;
-}
+        /* redirect I/O to pipes, so the parent can interface */
+        if (dup2(_pipe.iread(), STDIN_FILENO) == -1) {
+            throw "failed to redirect standard input";
+        }
+        if (dup2(_pipe.owrite(), STDOUT_FILENO) == -1) {
+            throw "failed to redirect standard output";
+        }
+        if (dup2(_pipe.owrite(), STDERR_FILENO) == -1) {
+            throw "failed to redirect standard error";
+        }
 
-bool process::is_running() {
-    if (kill(_pid, 0) == 0 && _is_running) {
-        _is_running = false;
+        /* close all pipes completely. these aren't to be used by the child */
+        if (close(_pipe.iread()) == -1 ||
+            close(_pipe.iwrite()) == -1 ||
+            close(_pipe.oread()) == -1 ||
+            close(_pipe.owrite()) == -1) {
+            throw "failed to close child pipes";
+        }
+        /* execute order 66 */
+        _function();
+        /* if we don't call exit, the process picks up in the calling function */
+        exit(0);
     }
-    return _is_running;
-}
 
-bool process::is_child() {
-    if (_pid == 0) {
-        return true;
+    /* parent process */
+    if (result > 0) {
+
+        /* no reason to read the input, nor write to the output */
+        close(_pipe.iread());
+        close(_pipe.owrite());
+
+        /* create the read thread and push it back */
+        _readers.emplace_back(std::thread([this]() {
+            /* block and read every character from stdin individually
+             * then push it back to the output buffer */
+            char buffer;
+            while (read(_pipe.oread(), &buffer, 1) > 0) {
+                _output << buffer;
+            }
+        }));
     }
-    return false;
 }
 
-pid_t process::get_pid() {
+const std::string sybil::process::output() const {
+    return _output.str();
+}
+
+void sybil::process::write_to(const std::string &input) {
+    const char* send = std::string(input + "\n\r").c_str();
+    write(_pipe.iwrite(), send, strlen(send));
+}
+
+const pid_t& sybil::process::get_pid() const {
     return _pid;
-}
-
-std::string process::get_running_command() {
-    return _running_command;
-}
-
-void process::execute() {
-    _running_command = "";
-    for (auto iterator : _args) {
-        _running_command += iterator;
-        _running_command += " ";
-    }
-    _pid = fork();
-    /* if everything went wrong, throw an exception */
-    if (_pid == -1) {
-        start_error();
-    }
-
-    /*
-    /* if we're in the parent process, announce success and set full command
-    if (_pid > 0) {
-        parent_routine();
-        fork_success();
-    }
-    */
-
-    /* if we're in the child process, execute the child */
-    if (is_child()) {
-        _pid = getpid();
-        child_routine();
-    }
-}
-
-void process::terminate() {
-    kill(_pid, SIGKILL);
-
-    int process_status;
-    const auto waited = waitpid(_pid, &process_status, 0);
-    if (waited == _pid) {
-        if (WIFEXITED(process_status) == -1) {
-            terminate_failure();
-        }
-        else {
-            terminate_success();
-        }
-    }
-    else {
-        terminate_failure();
-    }
-}
-
-inline void process::start_error() {
-    logger::get()->fatal("something went wrong starting the process. throwing exception...");
-    // throw sybil::process_start_error();
-}
-
-inline void process::fork_success() {
-    logger::get()->debug("successfully forked child process");
-}
-
-inline void process::terminate_success() {
-    logger::get()->debug("successfully stopped child process");
-}
-
-inline void process::terminate_failure() {
-    logger::get()->fatal("something went wrong when stopping the process. throwing exception...");
-    // throw sybil::process_termination_error();
-}
-
-inline void process::parent_routine() {
-    _is_running = true;
-    //close in[read] and out[write]
-    close(_pipe->get_stdin()[PIPE_READ]);
-    close(_pipe->get_stdout()[PIPE_WRITE]);
-    std::string buffer;
-    buffer += _path;
-    for (auto arg : _args) {
-        buffer += " ";
-        buffer += arg;
-    }
-    _running_command = buffer;
-}
-
-inline void process::child_routine() {
-    /* redirect the input and output through pipes to the parent process */
-    if (dup2(_pipe->get_stdin()[PIPE_READ], STDIN_FILENO) == -1) {
-        logger::get()->fatal("failed to redirect standard input!");
-    }
-    if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDOUT_FILENO) == -1) {
-        logger::get()->fatal("failed to redirect standard output!");
-    }
-    if (dup2(_pipe->get_stdout()[PIPE_WRITE], STDERR_FILENO) == -1) {
-        logger::get()->fatal("failed to redirect standard error output!");
-    }
-    //close all pipes to the child process, they're only to be accessed by the sybling
-    if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
-    close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
-    close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
-    close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
-        logger::get()->fatal("failed to close child pipes!");
-    }
-
-
-    //create C-style types of path and args
-    auto p_name = _path.c_str(); //should become char*
-
-    logger::get()->debug("[child process] attempting to turn over control to given process image...");
-    if (_has_args) { //run execvp if there are arguments to be run with the program
-        std::vector<char*> v_args; //C-style-character vector for the arguments
-        v_args.reserve(_args.size());
-        for (auto &iterator : _args) {
-            v_args.push_back(const_cast<char*>(iterator.c_str()));
-        }
-        v_args.push_back(nullptr);
-        auto p_args = v_args.data(); //store the raw array in p_args
-        _is_running = true;
-        auto result = execvp(p_name, p_args);
-        if (result < 0) {
-            logger::get()->debug({"execvp execution error [", std::to_string(result), "]"});
-            // throw sybil::process_execution_error();
-        }
-        else {
-            if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
-                close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
-                close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
-                close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
-                logger::get()->fatal("failed to close child pipes!");
-            }
-        }
-        logger::get()->verbose("closed child pipes!");
-    }
-    else { //if no arguments, just run execl
-        _is_running = true;
-        int status = execl(p_name, nullptr);
-        if (status < 0) {
-            logger::get()->debug({"execl execution error [", std::to_string(status), "]"});
-            // throw sybil::process_execution_error();
-        }
-        else {
-            if (close(_pipe->get_stdin()[PIPE_READ]) == -1 ||
-                close(_pipe->get_stdin()[PIPE_WRITE]) == -1 ||
-                close(_pipe->get_stdout()[PIPE_READ]) == -1 ||
-                close(_pipe->get_stdout()[PIPE_WRITE]) == -1) {
-                logger::get()->fatal("failed to close child pipes!");
-            }
-            logger::get()->verbose("closed child pipes!");
-        }
-    }
 }
