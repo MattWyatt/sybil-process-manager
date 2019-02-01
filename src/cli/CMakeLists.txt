@@ -1,6 +1,5 @@
 project(sybil-process-manager)
-include_directories(./)
 
-# source files are included in this SET statement
-set(SRCS
+add_library(cli
+        command_parser.h
         command_parser.cpp)

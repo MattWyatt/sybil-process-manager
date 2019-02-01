@@ -1,40 +1,17 @@
 project(sybil-process-manager)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${gtest_SOURCE_DIR}/include)
 
-set(DIRS ../src/core
-         ../src/cli)
-foreach(dir ${DIRS})
-    # grab all source files for each folder inside /src
-    get_directory_property(DIR_SRCS DIRECTORY ${dir} DEFINITION SRCS)
-    foreach (src ${DIR_SRCS})
-        list(APPEND SOURCE "${dir}/${src}")
-    endforeach(src)
+set(TEST_SRCS
+        test_process.cpp)
 
-    # include the cmakelists in the project
-    list(APPEND SOURCE "${dir}/CMakeLists.txt")
-endforeach(dir)
+add_executable(sybil_test main.cpp ${TEST_SRCS})
+enable_testing()
+add_test(tests sybil_test)
 
-list(APPEND SOURCE "${SRCS}")
-message(STATUS "SOURCES: ${SOURCE}")
-
-# add future tests here and link threads to them
-
-add_executable(file_test file_test.cpp ${SOURCE})
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(file_test Threads::Threads)
-
-add_executable(daemon_start_test daemon_start_test.cpp ${SOURCE})
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(daemon_start_test Threads::Threads)
-
-add_executable(reader_test reader_test.cpp ${SOURCE})
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(reader_test Threads::Threads)
-
-add_executable(multistart_test multistart_test.cpp ${SOURCE})
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(multistart_test Threads::Threads)
+target_link_libraries(sybil_test
+        core
+        cli
+        pthread
+        gtest)

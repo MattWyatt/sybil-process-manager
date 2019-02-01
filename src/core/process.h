@@ -1,18 +1,19 @@
 #ifndef SYBIL_PROCESS_MANAGER_SYBLING_H
 #define SYBIL_PROCESS_MANAGER_SYBLING_H
 
-#include <core/process_pipe.h>
+#include "process_pipe.h"
 #include <string>
 #include <sstream>
 #include <vector>
 #include <thread>
+#include <condition_variable>
 #include <functional>
 
 namespace sybil {
 
     class process {
     private:
-        static std::vector<std::thread> _readers;
+        std::thread _reader;
 
         process_pipe _pipe;
 
@@ -23,17 +24,15 @@ namespace sybil {
         pid_t _pid;
 
     public:
-        static void exit_processes();
-
-        explicit process(const std::function<void()> &_function);
-
-        void execute();
+        explicit process(const std::function<void()>& _function);
 
         const std::string output() const;
 
         void write_to(const std::string &input);
 
         const pid_t& get_pid() const;
+
+        void wait_for_exit();
 
     };
 }

@@ -7,17 +7,10 @@
 #include <cstring>
 #include <iostream>
 
-std::vector<std::thread> sybil::process::_readers;
+sybil::process::process(const std::function<void()>& function) {
+    _function = function;
 
-void sybil::process::exit_processes() {
-    for (std::thread &r : _readers) {
-        r.join();
-    }
-}
 
-sybil::process::process(const std::function<void()> &_function) : _function(_function) {}
-
-void sybil::process::execute() {
     int result = fork();
     _pid = result;
     if (result == -1) {
@@ -64,15 +57,15 @@ void sybil::process::execute() {
         close(_pipe.owrite());
 
         /* create the read thread and push it back */
-        _readers.emplace_back(std::thread([this]() {
+        _reader = std::thread([this]() {
             /* block and read every character from stdin individually
              * then push it back to the output buffer */
             char buffer;
             while (read(_pipe.oread(), &buffer, 1) > 0) {
                 _output << buffer;
             }
-        }));
-    }
+        });
+     }
 }
 
 const std::string sybil::process::output() const {
@@ -86,4 +79,11 @@ void sybil::process::write_to(const std::string &input) {
 
 const pid_t& sybil::process::get_pid() const {
     return _pid;
+}
+
+
+void sybil::process::wait_for_exit() {
+    if (_reader.joinable()) {
+        _reader.join();
+    }
 }
