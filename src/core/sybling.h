@@ -6,7 +6,7 @@
 namespace sybil {
     class sybling  {
     private:
-        sybil::process _process;
+        std::unique_ptr<sybil::process> _process;
 
         std::string _name;
 
