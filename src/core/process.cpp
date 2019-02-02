@@ -73,7 +73,7 @@ const std::string sybil::process::output() const {
 }
 
 void sybil::process::write_to(const std::string &input) {
-    const char* send = std::string(input + "\n\r").c_str();
+    const char* send = std::string(input + "\n").c_str();
     write(_pipe.iwrite(), send, strlen(send));
 }
 

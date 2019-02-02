@@ -33,7 +33,6 @@ namespace sybil {
         const pid_t& get_pid() const;
 
         void wait_for_exit();
-
     };
 }
 

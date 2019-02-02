@@ -6,20 +6,30 @@
 namespace sybil {
     class sybling  {
     private:
-        std::unique_ptr<sybil::process> _process;
+        sybil::process _process;
 
         std::string _name;
 
         std::string _path;
 
     public:
-        sybling(std::string& name, std::string& path);
+        sybling(const std::string& name, const std::string& path);
 
-        sybling(std::string& name, std::string& path, std::vector<std::string>& args);
+        sybling(const std::string& name, const std::string& path, std::vector<std::string>& args);
 
         const std::string& get_name() const;
 
         const pid_t& get_pid() const;
+
+        const std::string output() const;
+
+        void write_to(const std::string& input);
+
+        void wait_for_exit();
+
+        const bool running();
+
+        void stop();
     };
 }
 
