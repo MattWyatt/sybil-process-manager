@@ -7,17 +7,17 @@
 sybil::sybling::sybling(const std::string &name, const std::string &path) : _name(name), _path(path) {
     /* clang-tidy will complain to use std::make_unique()
      * but that will not work in this situation */
-    _process = std::unique_ptr<sybil::process>(new sybil::process([path]() {
+    _process = std::make_unique<sybil::process>([path]() {
         /* create the args array from the path and null */
         char* args[] = {(char*)path.c_str(), nullptr};
 
         /* execute from the args array */
         execvp(args[0], args);
-    }));
+    });
 }
 
 sybil::sybling::sybling(const std::string& name, const std::string& path, std::vector<std::string>& args) : _name(name), _path(path) {
-    _process = std::unique_ptr<sybil::process>(new sybil::process([path, args]() {
+    _process = std::make_unique<sybil::process>([path, args]() {
 
         /* create a vector and push back the path as the first element
          * this will let us call argv.data() for the execvp() */
@@ -33,7 +33,7 @@ sybil::sybling::sybling(const std::string& name, const std::string& path, std::v
          * the first element is going to be the path
          * argv.data() will emulate char* argv[] */
         execvp(argv[0], argv.data());
-    }));
+    });
 }
 
 const std::string& sybil::sybling::get_name() const {
