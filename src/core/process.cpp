@@ -14,7 +14,7 @@ sybil::process::process(const std::function<void()>& function) {
     int result = fork();
     _pid = result;
     if (result == -1) {
-        std::cerr << "error in fork!\nquitting!\n";
+        sybil::log.fatal("error in fork! quitting.");
         return;
     }
 
@@ -27,12 +27,15 @@ sybil::process::process(const std::function<void()>& function) {
 
         /* redirect I/O to pipes, so the parent can interface */
         if (dup2(_pipe.iread(), STDIN_FILENO) == -1) {
+            sybil::log.error("failed to redirect standard input");
             throw "failed to redirect standard input";
         }
         if (dup2(_pipe.owrite(), STDOUT_FILENO) == -1) {
+            sybil::log.error("failed to redirect standard output");
             throw "failed to redirect standard output";
         }
         if (dup2(_pipe.owrite(), STDERR_FILENO) == -1) {
+            sybil::log.error("failed to redirect standard error");
             throw "failed to redirect standard error";
         }
 
@@ -41,11 +44,15 @@ sybil::process::process(const std::function<void()>& function) {
             close(_pipe.iwrite()) == -1 ||
             close(_pipe.oread()) == -1 ||
             close(_pipe.owrite()) == -1) {
+
+            sybil::log.error("failed to close child pipes");
             throw "failed to close child pipes";
         }
         /* execute order 66 */
+        sybil::log.debug("starting given process with PID " + std::to_string(_pid));
         _function();
         /* if we don't call exit, the process picks up in the calling function */
+        sybil::log.debug("process with PID " + std::to_string(_pid) + " exited");
         exit(0);
     }
 

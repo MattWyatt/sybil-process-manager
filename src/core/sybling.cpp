@@ -5,8 +5,6 @@
 
 
 sybil::sybling::sybling(const std::string &name, const std::string &path) : _name(name), _path(path) {
-    /* clang-tidy will complain to use std::make_unique()
-     * but that will not work in this situation */
     _process = std::make_unique<sybil::process>([path]() {
         /* create the args array from the path and null */
         char* args[] = {(char*)path.c_str(), nullptr};

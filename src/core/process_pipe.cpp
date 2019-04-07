@@ -4,10 +4,12 @@
 
 sybil::process_pipe::process_pipe() {
     if (pipe(_input_pipe) < 0) {
+        sybil::log.error("error creating input pipe");
         throw "error creating input pipe";
     }
 
     if (pipe(_output_pipe) < 0) {
+        sybil::log.error("error creating output pipe");
         throw "error creating output pipe";
     }
 }

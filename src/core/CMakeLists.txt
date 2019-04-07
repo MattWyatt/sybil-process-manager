@@ -7,4 +7,6 @@ add_library(core
         process.cpp
         process_pipe
         sybling.h
-        sybling.cpp)
+        sybling.cpp
+        logger.h
+        logger.cpp)

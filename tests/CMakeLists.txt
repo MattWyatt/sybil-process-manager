@@ -5,7 +5,8 @@ include_directories(${gtest_SOURCE_DIR}/include)
 
 set(TEST_SRCS
         test_process.cpp
-        test_sybling.cpp)
+        test_sybling.cpp
+        test_logger.cpp)
 
 add_executable(sybil_test main.cpp ${TEST_SRCS})
 enable_testing()

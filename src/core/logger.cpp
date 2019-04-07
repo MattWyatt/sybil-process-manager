@@ -1,131 +1,90 @@
 #include <core/logger.h>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
+#include <vector>
 #include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <iostream>
 
-using namespace sybil;
+sybil::logger sybil::log;
 
-logger* logger::_logger_instance = nullptr;
+std::mutex sybil::logger::_log_mutex;
 
-logger* logger::get() {
-    if (!_logger_instance) {
-        _logger_instance = new logger;
-    }
-    return _logger_instance;
+sybil::logger::logger() : _level(sybil::log_level::LOG_INFO) {
+    std::string file_path = getenv("HOME");
+    file_path.append("/.sybil/sybil.log");
+    _log_file = std::ofstream(file_path);
 }
 
-void logger::write(std::string message, logger_level level) {
-    if (level > 3 || level < 0) {
-        write("log level out of range", DEBUG);
-        throw std::out_of_range("log level out of range");
-    }
-    //timestamp creation
-    auto current_time = std::chrono::system_clock::now();
-    time_t tt = std::chrono::system_clock::to_time_t(current_time);
-    auto printable_time = ctime(&tt);
-    std::string timestamp = "[";
-    timestamp += printable_time;
-    if (!timestamp.empty() && timestamp[timestamp.length()-1] == '\n') {
-        timestamp.erase(timestamp.length()-1);
-    }
-    timestamp += "] ";
-    //end timestamp creation
-    if (level >= _log_level) {
-        std::cout << timestamp << _prefixes.at(level) << message << std::endl;
-        std::ofstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"), std::ios::app);
-        if (file.is_open()) {
-            file << timestamp << _prefixes.at(level) << message << std::endl;
-        }
-        file.close();
-    }
+sybil::logger::logger(const std::string& file_path) : _level(sybil::log_level::LOG_INFO) {
+    _log_file = std::ofstream(file_path);
 }
 
-void logger::verbose(std::string message) {
-    write(message, VERBOSE);
+sybil::logger::logger(const std::string& file_path, const sybil::log_level& level) : _level(level) {
+    _log_file = std::ofstream(file_path);
 }
 
-void logger::debug(std::string message) {
-    write(message, DEBUG);
+sybil::logger::~logger() {
+    _log_file.close();
 }
 
-void logger::standard(std::string message) {
-    write(message, STANDARD);
-}
 
-void logger::fatal(std::string message) {
-    write(message, FATAL);
-}
+void sybil::logger::log(const sybil::log_level &level, const std::string &prefix, const std::string& text) {
+    /* get the system time for logging
+     * we have to convert it to a time_t to actually print it*/
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 
-void logger::verbose(std::vector<std::string> message) {
-    std::string buffer;
-    for (auto iterator : message) {
-        buffer += iterator;
+    /* create a stream to write output to
+     * we do all formatting right here*/
+    std::stringstream output;
+    output << "["
+           << prefix
+           << " "
+           << std::put_time(std::localtime(&now_c), "%F %T")
+           << "] "
+           << text << std::endl;
+
+    /* convert the stream to a string for easy printing */
+    std::string str_output = output.str();
+
+    /* acquire a lock guard on the logger mutex
+     * so that no two loggers can write at the same time to the same file */
+    std::lock_guard<std::mutex> lock(_log_mutex);
+
+    /* actually write to the streams
+     * because all the formatting took place earlier
+     * we can add more stuff to write to here if required */
+    _log_file << str_output;
+    if (level >= _level) {
+        std::cout << str_output;
     }
-    write(buffer, VERBOSE);
+    _log_file.flush();
 }
 
-void logger::debug(std::vector<std::string> message) {
-    std::string buffer;
-    for (auto iterator : message) {
-        buffer += iterator;
-    }
-    write(buffer, DEBUG);
+void sybil::logger::debug(const std::string& text) {
+    log(LOG_DEBUG, "DEBUG", text);
 }
 
-void logger::standard(std::vector<std::string> message) {
-    std::string buffer;
-    for (auto iterator : message) {
-        buffer += iterator;
-    }
-    write(buffer, STANDARD);
+void sybil::logger::info(const std::string& text) {
+    log(LOG_INFO, "INFO", text);
 }
 
-void logger::fatal(std::vector<std::string> message) {
-    std::string buffer;
-    for (auto iterator : message) {
-        buffer += iterator;
-    }
-    write(buffer, FATAL);
+void sybil::logger::warn(const std::string &text) {
+    log(LOG_WARN, "WARN", text);
 }
 
-void logger::set_level(logger_level level) {
-    if (level > 3 || level < 0) {
-        write("log level out of range", DEBUG);
-        throw std::out_of_range("log level out of range");
-    }
-    else {
-        _log_level = level;
-        write("set level to " + _prefixes.at(level), DEBUG);
-    }
+void sybil::logger::error(const std::string &text) {
+    log(LOG_ERROR, "ERROR", text);
 }
 
-std::vector<std::string> logger::latest(int count) {
-    std::ifstream file(std::string(getenv("HOME")) + std::string("/.sybil.log"));
-    std::string line_buffer;
-    std::vector<std::string> lines;
-    if (file.is_open()) {
-        while (std::getline(file, line_buffer)) {
-            lines.push_back(line_buffer);
-        };
-    }
-    file.close();
-    std::vector<std::string> latest;
-    int current_count = 0;
-    for (auto iterator : lines) {
-        if (current_count >= count) {
-            break;
-        }
-        latest.push_back(iterator);
-        current_count++;
-    }
-    std::reverse(latest.begin(), latest.end());
-    return latest;
+void sybil::logger::fatal(const std::string &text) {
+    log(LOG_FATAL, "FATAL", text);
 }
 
-std::string logger::print_latest(int count) {
-    auto v_latest = latest(count);
-    for (auto iterator : v_latest) {
-        std::cout << iterator << std::endl;
-    }
+void sybil::logger::set_level(const sybil::log_level &level) {
+    _level = level;
+}
+
+const sybil::log_level& sybil::logger::get_level() const {
+    return _level;
 }
