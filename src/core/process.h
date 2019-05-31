@@ -1,3 +1,10 @@
+/*
+ * sybil::process
+ *
+ * Class that, on creation, starts a given function in an entirely
+ * separate process, tracking all output and maintaining an input pipe
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_SYBLING_H
 #define SYBIL_PROCESS_MANAGER_SYBLING_H
 

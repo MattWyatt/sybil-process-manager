@@ -1,3 +1,10 @@
+/*
+ * sybil::process_pipe
+ *
+ * Simple class that represents a pipe between two processes
+ * and easily separates the reading and writing ends
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_PIPE_H
 #define SYBIL_PROCESS_MANAGER_PIPE_H
 

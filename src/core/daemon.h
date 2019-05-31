@@ -1,35 +1,12 @@
-/*
- * class that will be instanced to keep track of processes
- * sybil itself will, upon startup, check whether or not this daemon is running
- * if the daemon is not running it will be started, otherwise sybil will send commands directly to it
- */
-
 #ifndef SYBIL_PROCESS_MANAGER_DAEMON_H
 #define SYBIL_PROCESS_MANAGER_DAEMON_H
 
-#include <core/sybling.h>
-#include <core/process_logger.h>
-#include <vector>
-
 namespace sybil {
-    class daemon {
-    private:
-        bool _exit = false;
-        std::vector<sybil::sybling*> _syblings;
-        std::vector<sybil::process_logger*> _loggers;
-        inline void daemon_routine();
+    bool start_daemon();
 
-    protected:
-        void create_sybling(std::string path, std::string name, std::vector<std::string> arg_list);
-        void start_sybling(std::string name);
-        void terminate_sybling(std::string name);
-        void send_sybling(std::string name, std::string input);
-        std::string get_status(std::string name);
+    bool stop_daemon();
 
-    public:
-        daemon();
-    };
+    bool daemon_is_running();
 }
-
 
 #endif //SYBIL_PROCESS_MANAGER_DAEMON_H

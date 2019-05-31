@@ -11,27 +11,27 @@
 namespace sybil {
     class process_start_error : std::exception {
     public:
-        virtual const char* what();
+        const char* what();
     };
 
     class process_execution_error : std::exception {
     public:
-        virtual const char* what();
+        const char* what();
     };
 
     class process_termination_error : std::exception {
     public:
-        virtual const char* what();
+        const char* what();
     };
 
     class daemon_start_error : std::exception {
     public:
-        virtual const char* what();
+        const char* what();
     };
 
     class daemon_lock_error : std::exception {
     public:
-        virtual const char* what();
+        const char* what();
     };
 }
 

@@ -9,4 +9,12 @@ add_library(core
         sybling.h
         sybling.cpp
         logger.h
-        logger.cpp)
+        logger.cpp
+        locker.h
+        locker.cpp
+        daemon.h
+        daemon.cpp
+        exceptions.h
+        exceptions.cpp
+        named_pipe.h
+        named_pipe.cpp)

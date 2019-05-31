@@ -1,4 +1,6 @@
 /*
+ * sybil::locker
+ *
  * class to create and represent a lock on a file
  * used by the daemon process to keep a singleton instance of the actual process
  */
@@ -12,15 +14,15 @@ namespace sybil {
     class locker {
     private:
         std::string _path;
-        int _file;
+        size_t _file;
         int _lock;
-        bool _locked = false;
-        int _lock_error;
 
     public:
-        locker(std::string lock_file);
-        bool is_locked();
-        int get_lock_error();
+        explicit locker(const std::string& lock_file);
+
+        bool was_already_locked();
+
+        ~locker();
     };
 }
 

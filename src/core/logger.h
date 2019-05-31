@@ -1,3 +1,10 @@
+/*
+ * sybil::logger
+ *
+ * Logger class responsible for writing messages to a logfile and outputting
+ * them if necessary
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_LOGGER_H
 #define SYBIL_PROCESS_MANAGER_LOGGER_H
 

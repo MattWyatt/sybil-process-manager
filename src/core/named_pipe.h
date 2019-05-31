@@ -1,3 +1,12 @@
+/*
+ * sybil::named_pipe
+ *
+ * class that represents a named pipe for interprocess communication
+ *
+ * the daemon will receive while the client(s) may send commands
+ * to be executed by the daemon
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_NAMED_PIPE_H
 #define SYBIL_PROCESS_MANAGER_NAMED_PIPE_H
 
@@ -5,22 +14,19 @@
 #include <vector>
 
 namespace sybil {
-    /*
-     * class to represent a named pipe
-     * handles creating, writing, and reading on a pipe
-     * also abstracts everything through strings
-     */
     class named_pipe {
     private:
+        uint _buffer_size;
         std::string _path;
-        char* _pipe;
-        std::string _buffer;
+
     public:
-        named_pipe(std::string file_path);
-        void write(std::string text);
-        void write(std::vector<std::string> text);
-        void clear_file();
-        std::string read();
+        named_pipe(std::string path);
+
+        named_pipe(std::string path, uint buffer_size);
+
+        void send(const std::string& message);
+
+        std::string receive();
     };
 }
 

@@ -1,3 +1,10 @@
+/*
+ * sybil::sybling
+ *
+ * A sybling wraps a process and stores information about its
+ * name, execution path, and IO
+ */
+
 #ifndef SYBIL_PROCESS_MANAGER_OVERSEER_H
 #define SYBIL_PROCESS_MANAGER_OVERSEER_H
 

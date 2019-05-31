@@ -88,7 +88,6 @@ const pid_t& sybil::process::get_pid() const {
     return _pid;
 }
 
-
 void sybil::process::wait_for_exit() {
     if (_reader.joinable()) {
         _reader.join();
